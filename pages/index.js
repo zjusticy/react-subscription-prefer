@@ -57,6 +57,7 @@ export default function Home() {
     fetchData();
   }, []);
 
+  // Calculate the tatal number
   useEffect(() => {
     let acc = 0;
 
@@ -69,6 +70,7 @@ export default function Home() {
     SetNum(acc);
   }, [featureLists]);
 
+  // Save click handler for send request to the back-end
   const onSave = () => {
     setSubEnable(false);
     const actionList = [];
@@ -101,7 +103,6 @@ export default function Home() {
         return response.json();
       })
       .then((data) => {
-        // setSubEnable(true);
         console.log(data);
         window.location.reload();
       });

@@ -15,8 +15,7 @@ function Lists({
 
   const [activeFeature, setActiveFeature] = useState(new Set());
 
-  // const activeFeature = new Set();
-
+  // Initial the active state of the node
   useEffect(() => {
     featureLists[id] &&
       featureLists[id].orders.forEach((order) => {
@@ -27,31 +26,6 @@ function Lists({
       });
   }, [featureLists, id]);
 
-  // () => {
-  //   const newSet = new Set();
-  //   featureLists[id] &&
-  //     featureLists[id].orders.forEach((order) => {
-  //       if (order.isleaf === true) newSet.add(order.id);
-  //     });
-  //     console.log(featureLists[id] && featureLists[id].orders)
-  //   return newSet;
-
-  // useEffect(() => {
-  //   featureLists[id] &&
-  //     featureLists[id].orders.forEach((order) => {
-  //       if (order.isleaf === true) activeFeature.add(order.id);
-  //     });
-  //   features = featureLists[id] && featureLists[id].features;
-  //   subOrders = featureLists[id] && featureLists[id].orders;
-
-  //   console.log(features)
-  //   // Create a hash table for the orders
-  //   subOrders &&
-  //     subOrders.forEach((order) => {
-  //       orderObj[order.id] = { ...order };
-  //     });
-  // }, [featureLists, id]);
-
   const [newFetchID, setNewFetchID] = useState("0");
 
   const features = featureLists[id] && featureLists[id].features;
@@ -59,6 +33,7 @@ function Lists({
 
   const orderObj = {};
 
+  // Array to object for easier query
   subOrders &&
     subOrders.forEach((order) => {
       orderObj[order.id] = { ...order };
@@ -94,12 +69,6 @@ function Lists({
           (x) => x.id.toString() !== id
         );
       });
-      // Remove from global orders
-      // for (let i = 0; i < orders.length; i += 1) {
-      //   if (orders[i].id.toString() === id) {
-      //     orders.splice(i, 1);
-      //   }
-      // }
 
       setOrders((draft) => {
         // return draft.filter((x) => x.id.toString() !== id);
@@ -116,29 +85,12 @@ function Lists({
             if (ele.price !== price) {
               newOrders.push({ ...ele, price: ele.price - price });
 
-              // for (let i = 0; i < orders.length; i += 1) {
-              //   if (orders[i].id.toString() === id) {
-              //     orders[i].price -= price;
-              //   }
-              // }
-
               setOrders((draft) => {
-                // const newArray = [];
-                // prev.forEach((ele) => {
-                //   if (ele.id.toString() !== sourceId) newArray.push({ ...ele });
-                //   else newArray.push({ ...ele, price: x.price - price });
-                // });
-                // return newArray;
                 draft[curId].price -= price;
               });
             } else {
-              // for (let i = 0; i < orders.length; i += 1) {
-              //   if (orders[i].id.toString() === id) {
-              //     orders.splice(i, 1);
-              //   }
-              // }
+
               setOrders((draft) => {
-                // return prev.filter((x) => x.id.toString() !== sourceId);
                 delete draft[curId];
               });
             }
@@ -172,12 +124,6 @@ function Lists({
         isleaf: true,
       };
       setOrders((draft) => {
-        // const newArray = [];
-        // prev.forEach((ele) => {
-        //   newArray.push({ ...ele });
-        // });
-        // newArray.push(newLeaf);
-        // return newArray;
         draft[id] = newLeaf;
       });
 
@@ -204,19 +150,7 @@ function Lists({
             draft[newSourceId].orders = newOrders;
           });
 
-          // for (let i = 0; i < orders.length; i += 1) {
-          //   if (orders[i].id.toString() === id) {
-          //     orders[i].price += price;
-          //   }
-          // }
-
           setOrders((draft) => {
-            // const newArray = [];
-            // prev.forEach((ele) => {
-            //   if (ele.id.toString() !== sourceId) newArray.push({ ...ele });
-            //   else newArray.push({ ...ele, price: x.price + price });
-            // });
-            // return newArray;
             draft[curId].price += price;
           });
         } else {
@@ -239,13 +173,6 @@ function Lists({
             isleaf: false,
           };
           setOrders((draft) => {
-            // const newArray = [];
-            // prev.forEach((ele) => {
-            //   newArray.push({ ...ele });
-            // });
-            // console.log(sourceId, newSourceId);
-            // newArray.push(newLeaf);
-            // return newArray;
             draft[curId] = newLeaf;
           });
         }
@@ -270,48 +197,22 @@ function Lists({
         draft[newFetchID] = data;
       });
 
-      // data.orders.forEach((ele) => {
-      //   orders.push({ ...ele });
-      // });
 
       setOrders((draft) => {
-        // const newArray = [];
-        // prev.forEach((ele) => {
-        //   newArray.push({ ...ele });
-        // });
-        // data.orders.forEach((ele) => {
-        //   newArray.push({ id: ele.id, price: ele.price });
-        // });
-        // return newArray;
-        // return newArray;
         data.orders.forEach((ele) => {
           draft[ele.id] = { ...ele };
         });
       });
 
       setBackUpItem((draft) => {
-        // const newArray = [];
-        // prev.forEach((ele) => {
-        //   newArray.push({ ...ele });
-        // });
-        // data.orders.forEach((ele) => {
-        //   newArray.push({ id: ele.id, price: ele.price });
-        // });
-        // return newArray;
         data.orders.forEach((ele) => {
           draft[ele.id] = { id: ele.id, price: ele.price };
         });
       });
 
-      // data.orders.forEach((ele) => {
-      //   itemSet.push({ id: ele.id, price: ele.price });
-      // });
     };
 
     if (newFetchID !== "0") fetchData();
-    // const res = await fetch(url);
-
-    // const data = await res.json();
   }, [newFetchID]);
 
   const renderMore = (id, depth) => {
