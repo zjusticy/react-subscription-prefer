@@ -1,7 +1,132 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from "next/head";
+import styles from "../styles/Home.module.scss";
+import { useState, useEffect } from "react";
+
+import Lists from "../components/Lists/Lists";
+import { useImmer } from "use-immer";
+
+import Spinner from "../components/Spinner/Spinner";
 
 export default function Home() {
+  const [featureLists, setFeatureLists] = useImmer({});
+
+  const [orders, setOrders] = useImmer({});
+  // const orders = [];
+
+  const [totalNum, SetNum] = useState(0);
+
+  const [backUpItem, setBackUpItem] = useImmer({});
+
+  const [isLoading, setLoadingState] = useState(true);
+
+  const [subEnable, setSubEnable] = useState(true);
+
+  // Order item set to record the item for removal
+  // const orderItemSet = [];
+
+  useEffect(() => {
+    const url = "https://features-order-api.herokuapp.com/users/0";
+    // const res = await axios.get(url);
+
+    const fetchData = async () => {
+      const res = await fetch(url);
+
+      const data = await res.json();
+
+      setFeatureLists((draft) => {
+        draft["0"] = data;
+      });
+      // console.log(data.orders)
+
+      setOrders((draft) => {
+        data.orders.forEach((ele) => {
+          draft[ele.id] = { ...ele };
+        });
+      });
+      // setOrders((prev) => [...prev, ...data.orders]);
+
+      setBackUpItem((draft) => {
+        data.orders.forEach((ele) => {
+          draft[ele.id] = { id: ele.id, price: ele.price };
+        });
+      });
+
+      setLoadingState(false);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    let acc = 0;
+
+    featureLists["0"] &&
+      featureLists["0"].orders.length !== 0 &&
+      featureLists["0"].orders.forEach((order) => {
+        if (order.pid === 0) acc += order.price;
+      });
+
+    SetNum(acc);
+  }, [featureLists]);
+
+  const onSave = () => {
+    setSubEnable(false);
+    const actionList = [];
+    const tempObj = { ...backUpItem };
+
+    Object.keys(orders).forEach((key) => {
+      if (tempObj.hasOwnProperty(key)) {
+        if (orders[key].price !== tempObj[key].price)
+          actionList.push({ ...orders[key], type: "update" });
+        delete tempObj[key];
+      } else {
+        actionList.push({ ...orders[key], type: "add" });
+      }
+    });
+
+    Object.keys(tempObj).forEach((key) => {
+      actionList.push({ id: tempObj[key].id, type: "remove" });
+    });
+
+    console.log(actionList);
+
+    fetch("https://features-order-api.herokuapp.com/order", {
+      method: "PUT",
+      body: JSON.stringify({ data: actionList }),
+      headers: new Headers({
+        "Content-Type": "application/json",
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        // setSubEnable(true);
+        console.log(data);
+        window.location.reload();
+      });
+    // setSubEnable(true);
+    // console.log(actionList);
+  };
+
+  let navList = (
+    <nav className={styles.listsWrapper} aria-labelledby="nested-list">
+      <Lists
+        featureLists={featureLists}
+        setFeatureLists={setFeatureLists}
+        // orders={orders}
+        setOrders={setOrders}
+        setBackUpItem={setBackUpItem}
+        depth={0}
+        id={"0"}
+      />
+    </nav>
+  );
+
+  if (isLoading) {
+    navList = <Spinner />;
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -9,57 +134,24 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+      <header className={styles.header}>
+        <h3 className={styles.title}>Subscription Preferences</h3>
+      </header>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+      <main className={styles.main}>{navList}</main>
 
       <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
+        <div>Total: ${totalNum} / mo</div>
+        {subEnable ? (
+          <button alt="button" className={styles.button} onClick={onSave}>
+            Save
+          </button>
+        ) : (
+          <button alt="button" className={styles.button} disabled>
+            Save
+          </button>
+        )}
       </footer>
     </div>
-  )
+  );
 }
