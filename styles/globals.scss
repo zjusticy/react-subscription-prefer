@@ -22,9 +22,6 @@ html {
   text-size-adjust: 100%;
 }
 
-
-
-
 /*! getbase/base | MIT License | github.com/getbase/base */
 
 html {
@@ -75,29 +72,44 @@ form {
 }
 
 button {
-  text-decoration: none;
-  outline: none;
+  // text-decoration: none;
+  text-transform: none;
+  // outline: none;
   // border: none;
   margin: 0;
-  padding: 0;
-  width: auto;
+  // padding: 0;
+  // width: auto;
   overflow: visible;
 
   background: transparent;
 
   /* inherit font & color from ancestor */
-  color: inherit;
-  font: inherit;
+  // color: inherit;
+  // font: inherit;
 
   /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
-  line-height: normal;
+  line-height: 1.15;
+  font-size: 100%;
+}
 
-  /* Corrects font smoothing for webkit */
-  -webkit-font-smoothing: inherit;
-  -moz-osx-font-smoothing: inherit;
+/**
+ * Remove the inner border and padding in Firefox.
+ */
 
-  /* Corrects inability to style clickable `input` types in iOS */
-  -webkit-appearance: none;
+ button::-moz-focus-inner,
+ [type="button"]::-moz-focus-inner,
+ [type="reset"]::-moz-focus-inner,
+ [type="submit"]::-moz-focus-inner {
+   border-style: none;
+   padding: 0;
+ }
+ 
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
 }
 
 hr {
